@@ -26,6 +26,11 @@ Vector2 ProjectPoint(int radius, int angle) {
     return newPoint;
 }
 
+Color ColorPoint(int radius) {
+    Color spectrum[] = { RAYWHITE, SKYBLUE, GREEN, YELLOW, RED };
+    return spectrum[radius % (sizeof(spectrum) / sizeof(Color))];
+}
+
 static inline float Remap(float v, float inMin, float inMax, float outMin, float outMax) {
     if (inMax - inMin == 0) return (outMin + outMax) * 0.5f;
     float t = (v - inMin) / (inMax - inMin);
@@ -34,15 +39,15 @@ static inline float Remap(float v, float inMin, float inMax, float outMin, float
 
 Vector2 TransformPoint(Vector2 p, float minX, float maxX, float minY, float maxY) {
     Vector2 out;
-    out.x = Remap(p.x, minX, maxX, 0.0f, (float)screenWidth  - 1.0f);
-    out.y = Remap(p.y, minY, maxY, 0.0f, (float)screenHeight - 1.0f);
+    out.x = Remap(p.x, minX, maxX, 20.0f, (float)screenWidth  - 21.0f);
+    out.y = Remap(p.y, minY, maxY, 20.0f, (float)screenHeight - 21.0f);
     return out;
 }
 
 void RenderPoints(pointsArray *p, float minX, float maxX, float minY, float maxY) {
     for (int i = 0; i < p->size; i++) {
-        const Vector2 transformed = TransformPoint(p->points[i], minX, maxX, minY, maxY);
-        DrawCircle((int)transformed.x, (int)transformed.y, 2.0f, RAYWHITE);
+        const Vector2 transformed = TransformPoint(p->points[i].point, minX, maxX, minY, maxY);
+        DrawCircle((int)transformed.x, (int)transformed.y, 2.0f, p->points[i].color);
     }
 }
 
@@ -52,6 +57,7 @@ int main(void) {
     int nextInt = 0;
     float minX = 0, maxX = 0, minY = 0, maxY = 0;
     bool haveBounds = false;
+    char sizeBuffer[100];
     pointsArray points = {NULL, 0};
 
     srand((unsigned)time(NULL));
@@ -77,7 +83,9 @@ int main(void) {
                 if (newPoint.y < minY) minY = newPoint.y;
                 if (newPoint.y > maxY) maxY = newPoint.y;
             }
-            appendPoint(&points, newPoint);
+            const Color newColor = ColorPoint(prevInt);
+            const spiralPoint sp = { newPoint, newColor };
+            appendPoint(&points, sp);
         }
         else frameCount++;
 
@@ -86,7 +94,8 @@ int main(void) {
         ClearBackground(DARKGRAY);
         RenderPoints(&points, minX, maxX, minY, maxY);
         DrawText("PRESS SPACE to PAUSE, Q to QUIT", 10, GetScreenHeight() - 25, 20, LIGHTGRAY);
-        if (pause && ((frameCount/30)%2)) DrawText("PAUSED", 350, 200, 30, GRAY);
+        sprintf(sizeBuffer, "%lu", points.size);
+        DrawText(sizeBuffer, screenWidth-100, GetScreenHeight() - 25, 20, LIGHTGRAY);
         DrawFPS(10,10);
         EndDrawing();
     }
