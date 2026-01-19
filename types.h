@@ -18,6 +18,10 @@ inline void appendPoint(pointsArray * array, spiralPoint point) {
     if (array->size >= array->capacity) {
         array->capacity = array->capacity == 0 ? 256 : array->capacity * 2;
         array->points = realloc(array->points, array->capacity * sizeof(spiralPoint));
+        if (array->points == NULL) {
+            perror("Failed to allocate space for points array");
+            exit(EXIT_FAILURE);
+        }
     }
     array->points[array->size++] = point;
 }

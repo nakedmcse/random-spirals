@@ -11,7 +11,6 @@ const int screenWidth = 800;
 const int screenHeight = 800;
 const int targetFPS = 200;
 
-
 void InitGame() {
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     InitWindow(screenWidth, screenHeight, "Random Numbers on a Circular Plane");
